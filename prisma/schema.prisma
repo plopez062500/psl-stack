@@ -10,34 +10,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        String @id @default(uuid())
-  title     String
-  body      String
-  user      User   @relation(fields: [userEmail], references: [email])
-  userEmail String
+model AuthUser {
+  id           String    @id @unique
+  auth_session AuthSession[]
+  auth_key     AuthKey[]
+  // here you can add custom fields for your user
+  // e.g. name, email, username, roles, etc.
+  fname String
+  lname String
+  email String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@map("auth_user")
 }
 
-model User {
-  email        String    @id @unique
-  name         String
-  passwordHash String
-  session      Session[]
+model AuthSession {
+  id             String	@id @unique
+  user_id        String
+  active_expires BigInt
+  idle_expires   BigInt
+  auth_user      AuthUser   @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Post      Post[]
+  @@index([user_id])
+  @@map("auth_session")
 }
 
-model Session {
-  id      String   @id @unique @default(uuid())
-  iat     DateTime @default(now())
-  eat     DateTime
-  revoked Boolean
+model AuthKey {
+  id              String  @id @unique
+  hashed_password String?
+  user_id         String
+  primary_key     Boolean
+  expires         BigInt?
+  auth_user       AuthUser    @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
-  user      User   @relation(fields: [userEmail], references: [email])
-  userEmail String
+  @@index([user_id])
+  @@map("auth_key")
 }

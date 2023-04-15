@@ -1,5 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 
+import type { Auth } from '$lib/lucia/lucia.server';
 import type { Session, User } from '$lib/prisma/auth.server';
 import type { PrismaClient } from '@prisma/client';
 
@@ -11,15 +12,20 @@ declare global {
 		// interface Platform {}
 
 		interface Locals {
-			// validate: import('@lucia-auth/sveltekit').Validate;
-			// validateUser: import('@lucia-auth/sveltekit').ValidateUser;
-			// setSession: import('@lucia-auth/sveltekit').SetSession;
-			user: User | null;
-			session: Session | null;
+			auth: import('lucia-auth').AuthRequest;
 		}
 	}
 
 	var prisma: PrismaClient;
+
+	namespace Lucia {
+		type Auth = import('$lib/lucia/lucia.server').Auth;
+		type UserAttributes = {
+			fname: string;
+			lname: string;
+			email: string;
+		};
+	}
 }
 
 export {};
